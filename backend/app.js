@@ -1,8 +1,15 @@
 const express = require('express');
 const axios = require('axios');
 const cheerio = require('cheerio');
+const cors = require('cors');
+
 
 const app = express();
+// app.use((req, res, next) => {
+//   res.header('Access-Control-Allow-Origin', 'http://localhost:5173');
+//   next();
+// });
+app.use(cors());
 const endpoints = [
   {
     name: 'Obtener todos los personajes',
@@ -93,12 +100,10 @@ app.get('/getCharacter/:name', async (req, res) => {
 
     const seriesList = techniques$('h3 #Serie').parent().next('ul');
     const tecnicas = []
-    // Obtener los elementos <li> dentro del <ul> encontrado
+
     const seriesListItems = seriesList.find('ul li').filter((index, element) => $(element).find('ul').length === 0);
     seriesListItems.find('li .image').remove();
 
-    console.log(seriesListItems)
-    // Obtener los textos de los elementos li
    seriesListItems.each((index, element) => {
         if (index >= 10) {
           return;
