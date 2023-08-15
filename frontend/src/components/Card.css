@@ -1,3 +1,19 @@
-.card{
-    height: 380px;
+
+  
+.card-container {
+
+    max-height: 450px;
+    /* Ajusta este valor según sea necesario */
+    overflow: hidden;
+
+}
+.card-title-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Opcional: para centrar el contenido verticalmente */
+  }
+.card img {
+    width: 300px;
+    /*height: 450px;*/
+
 }

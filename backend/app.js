@@ -4,7 +4,7 @@ const cheerio = require('cheerio');
 const cors = require('cors');
 const app = express();
 
-let img = '';
+// let img = '';
 
 app.use(cors());
 
@@ -36,45 +36,42 @@ app.get('/allCharacters', async (req, res) => {
     const response = await axios.get(url);
     const $ = cheerio.load(response.data);
 
-    const characters = [];
     const characterLinks = [];
-
     $('.mw-parser-output > ul > li:not(#toc li) > a').each((index, element) => {
-      if (index >= 12) {
-        return;
-      } else {
+      if (index < 12) {
         const characterUrl = $(element).attr('href');
         const characterName = $(element).text().trim();
         characterLinks.push({ url: characterUrl, name: characterName });
       }
     });
 
-    for (const characterLink of characterLinks) {
+    const characters = await Promise.all(characterLinks.map(async (characterLink) => {
       try {
         const characterResponse = await axios.get(`https://dragonball.fandom.com${characterLink.url}`);
         const character$ = cheerio.load(characterResponse.data);
 
         const imageUrl = character$('.pi-image-thumbnail').attr('src'); 
-        const imageUrlUpdate=imageUrl.replace("static","vignette");
+        const imageUrlUpdate = imageUrl.replace('static', 'vignette');
 
-        characters.push({
+        return {
           name: characterLink.name,
           url: characterLink.url,
           imgURL: imageUrlUpdate,
-        });
+        };
       } catch (error) {
         console.error(`Error obteniendo datos de: ${characterLink.url}`, error);
+        return null;
       }
-    }
+    }));
 
-    console.log(characters);
-    res.json(characters);
+    const filteredCharacters = characters.filter(character => character !== null);
+
+    console.log(filteredCharacters);
+    res.json(filteredCharacters);
   } catch (error) {
     res.status(500).json({ error: 'Error en el scraping' });
   }
 });
-
-
 
 app.get('/getCharacter/:name', async (req, res) => {
   try {
