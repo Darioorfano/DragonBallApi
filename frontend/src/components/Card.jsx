@@ -1,5 +1,5 @@
 import { useFetch } from "../hooks/useFetch"
-
+import './Card.css'
 
 export const Card = () => {
   
@@ -7,16 +7,19 @@ export const Card = () => {
   
   return (
     <>
- <div className="container">
-      {data.map((character) => (
-        <div key={character.id} className="card" style={{ width: '18rem' }}>
-          <img src={character.url} className="card-img-top" />
+ <div className="container d-flex justify-content-space-around flex-wrap mt-5 ">
+      {data.map((character,index) => (
+        <div key={index} className="col-lg-3">
+        <div className="card mb-2" style={{ width: '18rem' }}>
+          <img src={character.imgURL} className="card-img-top img-fluid"  referrerPolicy="no-referrer"/>
           <div className="card-body">
-            <h5 className="card-title">{character.name}</h5>
+            <h6 className="card-title">{character.name}</h6>
             <p className="card-text"></p>
-            <a href="#" className="btn btn-primary">Go somewhere</a>
+            <a href="#" className="btn btn-primary mt-3 d-block m-auto">Go somewhere</a>
           </div>
         </div>
+        </div>
+
       ))}
     </div>
     </>

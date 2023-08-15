@@ -2,14 +2,12 @@ const express = require('express');
 const axios = require('axios');
 const cheerio = require('cheerio');
 const cors = require('cors');
-
-
 const app = express();
-// app.use((req, res, next) => {
-//   res.header('Access-Control-Allow-Origin', 'http://localhost:5173');
-//   next();
-// });
+
+let img = '';
+
 app.use(cors());
+
 const endpoints = [
   {
     name: 'Obtener todos los personajes',
@@ -23,45 +21,60 @@ const endpoints = [
     method: 'GET',
     description: ''
   },
-
-
 ]
 
 app.get('/', (req, res) => {
   return res.json(endpoints);
 }
-
 )
+
 
 app.get('/allCharacters', async (req, res) => {
   try {
     const url = 'https://dragonball.fandom.com/es/wiki/Lista_de_personajes';
 
     const response = await axios.get(url);
-
     const $ = cheerio.load(response.data);
 
     const characters = [];
+    const characterLinks = [];
 
-    $('.mw-parser-output > ul > li:not(#toc li)').each((index, element) => {
-      if (index >= 10) {
-        return
+    $('.mw-parser-output > ul > li:not(#toc li) > a').each((index, element) => {
+      if (index >= 12) {
+        return;
       } else {
-        const url = $(element).children().attr('href')
-        const name = $(element).text().trim();
-        characters.push({
-          name,
-          url
-        });
+        const characterUrl = $(element).attr('href');
+        const characterName = $(element).text().trim();
+        characterLinks.push({ url: characterUrl, name: characterName });
       }
-
     });
-    console.log(characters)
+
+    for (const characterLink of characterLinks) {
+      try {
+        const characterResponse = await axios.get(`https://dragonball.fandom.com${characterLink.url}`);
+        const character$ = cheerio.load(characterResponse.data);
+
+        const imageUrl = character$('.pi-image-thumbnail').attr('src'); 
+        const imageUrlUpdate=imageUrl.replace("static","vignette");
+
+        characters.push({
+          name: characterLink.name,
+          url: characterLink.url,
+          imgURL: imageUrlUpdate,
+        });
+      } catch (error) {
+        console.error(`Error obteniendo datos de: ${characterLink.url}`, error);
+      }
+    }
+
+    console.log(characters);
     res.json(characters);
   } catch (error) {
     res.status(500).json({ error: 'Error en el scraping' });
   }
 });
+
+
 
 app.get('/getCharacter/:name', async (req, res) => {
   try {
@@ -90,7 +103,8 @@ app.get('/getCharacter/:name', async (req, res) => {
 
     const characterName = $('.mw-page-title-main').text().trim();
 
-    const imageUrl = $('.image.image-thumbnail').attr('href');
+    img= $('.pi-image-thumbnail').attr('src');
+    const imageUrlUpdate=img.replace("static","vignette");
 
 
     const techniquesUrl = `https://dragonball.fandom.com/es/wiki/${name}/Técnicas_y_Habilidades`;
@@ -120,7 +134,7 @@ app.get('/getCharacter/:name', async (req, res) => {
     const characterData = {
       name: characterName,
       info: characterInfo,
-      image: imageUrl,
+      image: imageUrlUpdate,
       techniques: tecnicas
     };
 
@@ -130,7 +144,6 @@ app.get('/getCharacter/:name', async (req, res) => {
   }
 });
 
-app.get('')
 
 
 app.listen(3000, () => {
