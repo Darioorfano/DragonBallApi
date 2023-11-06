@@ -38,7 +38,7 @@ app.get('/allCharacters', async (req, res) => {
 
     const characterLinks = [];
     $('.mw-parser-output > ul > li:not(#toc li) > a').each((index, element) => {
-      if (index < 12) {
+      if (index <= 20) {
         const characterUrl = $(element).attr('href');
         const characterName = $(element).text().trim();
         characterLinks.push({ url: characterUrl, name: characterName });
@@ -91,7 +91,6 @@ app.get('/getCharacter/:name', async (req, res) => {
       .nextUntil(tocElement, 'p')
       .filter((index, element) => $(element).text().trim() !== '');
 
-    // Obtener la información de los párrafos
     const characterInfo = characterInfoElements
       .map((index, element) => $(element).text())
       .get()

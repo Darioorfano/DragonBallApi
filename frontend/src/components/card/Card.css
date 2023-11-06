@@ -1,0 +1,14 @@
+.card{
+    height: 520px !important;
+}
+.images{
+    max-width: 100%;
+    display: flex;
+    margin: auto;
+    height: 400px;
+}
+.card-title{
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
